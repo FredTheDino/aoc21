@@ -38,4 +38,4 @@ solve i =
 
 main :: _
 main = do
-  FS.readTextFile UTF8 "inputd01.txt" (parse >>> solve)
+  FS.readTextFile UTF8 "input/d01.txt" (parse >>> solve)
