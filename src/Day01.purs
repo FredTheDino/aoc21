@@ -9,14 +9,12 @@ import Node.Encoding (Encoding(UTF8))
 import Partial.Unsafe (unsafeCrashWith)
 import Data.String.Utils (lines)
 import Data.Int (fromString)
-import Data.Maybe (Maybe(..), isJust, fromMaybe)
-import Data.Array (mapMaybe, zipWith, drop, foldMap, filter, length)
-import Data.Tuple (fst, snd)
+import Data.Array (mapMaybe, zipWith, drop, filter, length)
 
-parse :: _
+parse :: forall t. Either t String -> Array Int
 parse = case _ of
-  Left _ -> unsafeCrashWith "Failed to read"
   Right buff -> lines buff # mapMaybe fromString
+  _ -> unsafeCrashWith "Failed to read"
 
 solve :: Array Int -> Effect Unit
 solve i =
@@ -36,6 +34,6 @@ solve i =
       log (show numInc)
       log (show numIncWin)
 
-main :: _
+main :: Effect Unit
 main = do
   FS.readTextFile UTF8 "input/d01.txt" (parse >>> solve)
