@@ -103,7 +103,6 @@ largest = maximum >>> fromMaybe 0
 smallest :: Array Int -> Int
 smallest = minimum >>> fromMaybe 0
 
--- Too low: 734
 solve :: Input -> Effect Unit
 solve i =
   let
