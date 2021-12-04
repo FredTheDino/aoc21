@@ -9,9 +9,10 @@ import Data.Maybe (Maybe(..))
 import Day01 as D01
 import Day02 as D02
 import Day03 as D03
+import Day04 as D04
 
 allDays :: Array (Effect Unit)
-allDays = [D01.main, D02.main, D03.main]
+allDays = [D01.main, D02.main, D03.main, D04.main]
 
 runAll :: Effect (Array Unit)
 runAll = do
