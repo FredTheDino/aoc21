@@ -13,6 +13,7 @@ to generate this file without the comments in this block.
 { name = "my-project"
 , dependencies =
   [ "arrays"
+  , "bigints"
   , "console"
   , "debug"
   , "effect"
@@ -22,6 +23,7 @@ to generate this file without the comments in this block.
   , "maybe"
   , "node-buffer"
   , "node-fs"
+  , "numbers"
   , "parsing"
   , "partial"
   , "prelude"

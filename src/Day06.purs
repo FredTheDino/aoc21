@@ -5,7 +5,7 @@ import Data.Array (fromFoldable, (:), filter, length, (..))
 import Data.Array as A
 import Data.Either (Either(..))
 import Data.Foldable (sum, minimum, maximum)
-import Data.Int (fromString)
+import Data.Number (fromString)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String.CodeUnits (fromCharArray)
 import Data.HashMap as HM
@@ -22,17 +22,17 @@ import Text.Parsing.Parser.Token as PT
 import Data.Tuple (Tuple(..))
 import Debug
 
-numberParser :: P.Parser String Int
+numberParser :: P.Parser String Number
 numberParser = do
   PS.skipSpaces
   digits <- PC.many1 PT.digit
   pure $ fromFoldable digits
     # fromCharArray
     # fromString
-    # fromMaybe 0
+    # fromMaybe 0.0
 
 type Input
-  = HM.HashMap Int Int
+  = HM.HashMap Number Number
 
 inputParser :: P.Parser String Input
 inputParser = do
@@ -40,7 +40,7 @@ inputParser = do
   pure
     $ fishes
     # fromFoldable
-    # A.foldr (\k -> HM.upsert (add 1) k 1) HM.empty
+    # A.foldr (\k -> HM.upsert (add 1.0) k 1.0) HM.empty
 
 parse :: _ -> Input
 parse = case _ of
@@ -52,7 +52,7 @@ parse = case _ of
 step :: Input -> Input
 step i =
   let
-    stepFish (Tuple a b) = Tuple (a - 1) b
+    stepFish (Tuple a b) = Tuple (a - 1.0) b
 
     nextUnfiltered =
       i
@@ -62,14 +62,14 @@ step i =
 
     numNew =
       nextUnfiltered
-        # HM.lookup (-1)
-        # fromMaybe 0
+        # HM.lookup (-1.0)
+        # fromMaybe 0.0
 
     next =
       nextUnfiltered
-        # HM.insertWith add 8 numNew
-        # HM.insertWith add 6 numNew
-        # HM.filterKeys (\k -> k >= 0)
+        # HM.insertWith add 8.0 numNew
+        # HM.insertWith add 6.0 numNew
+        # HM.filterKeys (\k -> k >= 0.0)
   in
     next
 
@@ -77,7 +77,7 @@ doN :: forall a. Int -> (a -> a) -> a -> a
 doN n _ a | n <= 0 = a
 doN n f a = doN (n - 1) f a # f
 
-count i = HM.values i # A.foldr add 0
+count i = HM.values i # A.foldr add 0.0
 
 solve :: Input -> Effect Unit
 solve i =
