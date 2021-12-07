@@ -77,8 +77,8 @@ parse =
 solve :: _
 solve i =
   let
-    total = spy "length" $ length i
-    counts = spy "counts" $ reduce sumComp i
+    total = length i
+    counts = reduce sumComp i
 
     gamma = counts <#> (\a -> a >= (total - a))
     epsilon = gamma <#> not

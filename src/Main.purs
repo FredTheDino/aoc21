@@ -12,14 +12,16 @@ import Day03 as D03
 import Day04 as D04
 import Day05 as D05
 import Day06 as D06
+import Day07 as D07
 
 allDays :: Array (Effect Unit)
-allDays = [D01.main, D02.main, D03.main, D04.main, D05.main, D06.main]
+allDays = [D01.main, D02.main, D03.main, D04.main, D05.main, D06.main, D07.main]
 
-runAll :: Effect (Array Unit)
+runAll :: Effect Unit
 runAll = do
   log "Running all..."
-  for allDays \d -> d
+  _ <- for allDays \d -> d
+  pure unit
 
 runLatest :: Effect Unit
 runLatest = do
