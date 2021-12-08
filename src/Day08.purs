@@ -32,16 +32,19 @@ repeatParser n parser =
   else do
     pure []
 
-wordParser :: P.Parser String (S.Set Char)
+wordParser :: P.Parser String (Digit)
 wordParser = do
   PS.skipSpaces
   letters <- PC.many1 PT.letter
   pure $ S.fromFoldable letters
 
 type Line =
-  { every :: Array (S.Set Char)
-  , found :: Array (S.Set Char)
+  { every :: Array Digit
+  , found :: Array Digit
   }
+
+type Digit = (S.Set Char)
+type Knowledge = Array (Tuple (Digit) (Maybe Int))
 
 lineParser :: P.Parser String Line
 lineParser = do
@@ -75,7 +78,7 @@ countSimple xs = xs <#> matches # sum
     7 -> 1
     _ -> 0
 
-solveSimple :: S.Set Char -> Maybe Int
+solveSimple :: Digit -> Maybe Int
 solveSimple x =
   case S.size x of
     2 -> Just 1
@@ -95,7 +98,7 @@ combine as bs = A.zip as bs <#> merge
 isA :: forall t. Int -> (Tuple t (Maybe Int) -> Boolean)
 isA n = \(Tuple _ x) -> x == Just n
 
-solve960 :: Array (Tuple (S.Set Char) (Maybe Int)) -> (S.Set Char) -> Maybe Int
+solve960 :: Knowledge -> Digit -> Maybe Int
 solve960 known x = do
   _ <- case S.size x of
     6 -> Just unit
@@ -106,7 +109,7 @@ solve960 known x = do
   else if S.subset seven x then Just 0
   else Just 6
 
-solve235 :: Array (Tuple (S.Set Char) (Maybe Int)) -> (S.Set Char) -> Maybe Int
+solve235 :: Knowledge -> Digit -> Maybe Int
 solve235 known x = do
   _ <- case S.size x of
     5 -> Just unit
@@ -118,7 +121,7 @@ solve235 known x = do
   else if S.subset (S.difference eight four) x then Just 2
   else Just 5
 
-figureOutWires :: Array (S.Set Char) -> Array (Tuple (S.Set Char) (Maybe Int))
+figureOutWires :: Array Digit -> Knowledge
 figureOutWires x =
   let
     r f = A.zip x $ (x <#> f)
@@ -127,7 +130,7 @@ figureOutWires x =
     c = combine b (r (solve235 b))
   in
     c
-translate :: Tuple (Array (Tuple (S.Set Char) (Maybe Int))) (Array (S.Set Char)) -> Array Int
+translate :: Tuple Knowledge (Array Digit) -> Array Int
 translate (Tuple known xs) = xs
     <#> (\x -> A.findMap (\(Tuple a b) -> if a == x then b else Nothing) known)
     <#> fromMaybe 0
@@ -138,7 +141,6 @@ parseDec = A.foldl (\i s -> 10 * i + s) 0
 solve :: Input -> Effect Unit
 solve i =
   let
-    known :: Array (Array (Tuple (S.Set Char) (Maybe Int)))
     known = i <#> _.every <#> figureOutWires
 
     total = i
