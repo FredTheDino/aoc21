@@ -124,12 +124,13 @@ solve235 known x = do
 figureOutWires :: Array Digit -> Knowledge
 figureOutWires x =
   let
-    r f = A.zip x $ (x <#> f)
-    a = r solveSimple
-    b = combine a (r (solve960 a))
-    c = combine b (r (solve235 b))
+    apply f = A.zip x $ (x <#> f)
+    step f a = combine a (apply (f a))
   in
-    c
+    apply solveSimple
+        # step solve960
+        # step solve235
+        
 translate :: Tuple Knowledge (Array Digit) -> Array Int
 translate (Tuple known xs) = xs
     <#> (\x -> A.findMap (\(Tuple a b) -> if a == x then b else Nothing) known)
