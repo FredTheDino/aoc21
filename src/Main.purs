@@ -13,9 +13,10 @@ import Day04 as D04
 import Day05 as D05
 import Day06 as D06
 import Day07 as D07
+import Day08 as D08
 
 allDays :: Array (Effect Unit)
-allDays = [D01.main, D02.main, D03.main, D04.main, D05.main, D06.main, D07.main]
+allDays = [D01.main, D02.main, D03.main, D04.main, D05.main, D06.main, D07.main, D08.main]
 
 runAll :: Effect Unit
 runAll = do
