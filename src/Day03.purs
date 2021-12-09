@@ -7,12 +7,9 @@ import Node.FS.Async as FS
 import Node.Encoding (Encoding(UTF8))
 import Partial.Unsafe (unsafeCrashWith)
 import Data.Maybe (Maybe(..))
-import Data.String.Utils (lines, words, toCharArray)
-import Data.Int (fromString)
-import Data.Array (mapMaybe, foldl, drop, (!!), zip, filter, null, length)
-import Data.Tuple (fst, snd, Tuple(..))
-import Data.Function (identity)
-import Debug (spy)
+import Data.String.Utils (lines, toCharArray)
+import Data.Array (foldl, drop, (!!), zip, filter, null, length)
+import Data.Tuple (Tuple(..))
 
 reduce :: (Array Int -> Array Int -> Array Int) -> Array (Array Int) -> Array Int
 reduce f xs = case xs !! 0 of
