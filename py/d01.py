@@ -1,6 +1,6 @@
 def readAll():
     out = []
-    for line in open("inputd01.txt"):
+    for line in open("inputs/d01.txt"):
         try:
             out += [int(line)]
         except:
