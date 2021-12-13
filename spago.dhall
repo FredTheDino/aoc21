@@ -19,6 +19,7 @@ to generate this file without the comments in this block.
   , "either"
   , "foldable-traversable"
   , "integers"
+  , "lists"
   , "maybe"
   , "node-buffer"
   , "node-fs"
