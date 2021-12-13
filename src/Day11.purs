@@ -1,10 +1,9 @@
-module Day09 where
+module Day11 where
 
 import Prelude
 import Data.Array (fromFoldable, (!!), (:))
 import Data.Array as A
 import Data.Either (Either(..))
-import Data.Foldable (sum)
 import Data.Int (fromString)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
@@ -12,6 +11,7 @@ import Data.Map as M
 import Data.Set as S
 import Data.String.CodeUnits (singleton)
 import Data.Ord (abs)
+import Data.Eq (eq)
 import Effect (Effect)
 import Effect.Console (log)
 import Node.Encoding (Encoding(UTF8))
@@ -21,7 +21,8 @@ import Text.Parsing.Parser as P
 import Text.Parsing.Parser.Combinators as PC
 import Text.Parsing.Parser.String as PS
 import Text.Parsing.Parser.Token as PT
-import Data.Foldable (minimum, sum, product)
+import Data.Foldable (minimum, sum, product, or)
+import Data.List.Lazy as L
 import Debug
 
 type Input = M.Map (Tuple Int Int) Int
@@ -41,7 +42,6 @@ inputParser = do
   lines <- PC.many1 (PC.try parseLine)
   pure $ lines
     # A.fromFoldable
-    -- :thinking:
     # (A.mapWithIndex \y as -> as <#> \(Tuple x n) -> Tuple (Tuple x y) n)
     # A.concat
     # M.fromFoldable
@@ -53,70 +53,65 @@ parse = case _ of
     Left err -> unsafeCrashWith $ P.parseErrorMessage err
     Right o -> o
 
+inc :: Int -> Int
+inc = (+) 1
+
 adjacenct :: Tuple Int Int -> Array (Tuple Int Int)
 adjacenct (Tuple x y) =
   [ Tuple (x + 1) y
   , Tuple (x - 1) y
   , Tuple x (y + 1)
   , Tuple x (y - 1)
+  , Tuple (x - 1) (y - 1)
+  , Tuple (x + 1) (y + 1)
+  , Tuple (x - 1) (y + 1)
+  , Tuple (x + 1) (y - 1)
   ]
 
-neighbors :: Input -> Tuple Int Int -> Array Int
-neighbors field pos = adj # A.mapMaybe (\a -> M.lookup a field)
-  where
-  adj = adjacenct pos
+type State = { state :: Input, flashed :: S.Set (Tuple Int Int) }
 
-type Seen = S.Set (Tuple Int Int)
-
-fill :: Input -> Tuple Int Int -> Seen -> Seen
-fill field pos seen = case M.lookup pos field, S.member pos seen of
-  _, true -> seen
-  Just 9, _ -> seen
-  Nothing, _ -> seen
-  _, _ -> adjacenct pos # A.foldr (fill field) (S.insert pos seen)
-
-startFill :: Input -> Tuple Int Int -> Seen -> Tuple Seen Int
-startFill field start seenPre =
+checkFlash :: State -> Tuple Int Int -> State
+checkFlash id@{ state, flashed } pos =
   let
-    startSize = S.size seenPre
-    seen = fill field start seenPre
-    endSize = S.size seen
+    expensive p = postUpdate
+      where
+      neighbors = adjacenct p
+      postFlash = neighbors
+        # A.foldl (\s n -> M.update (inc >>> Just) n s) state
+      postUpdate = neighbors
+        # A.foldl checkFlash { state: postFlash, flashed: S.insert pos flashed }
+
+    hasFlashed = S.member pos flashed
+    notShouldFlash = M.lookup pos state <= Just 9
   in
-    Tuple seen (endSize - startSize)
+    if or [ hasFlashed, notShouldFlash ] then id
+    else expensive pos
+
+step :: State -> State
+step { state } =
+  let
+    reset n = if n > 9 then 0 else n
+    stateInc = M.mapMaybe (inc >>> Just) state
+    stateFlash = M.keys stateInc
+      # A.fromFoldable
+      # A.foldl checkFlash { state: stateInc, flashed: S.empty }
+    stateZero = M.mapMaybe (reset >>> Just) stateFlash.state
+  in
+   { state: stateZero, flashed: stateFlash.flashed }
 
 solve :: Input -> Effect Unit
 solve i =
   let
-    isLowest :: Tuple (Tuple Int Int) Int -> Maybe Int
-    isLowest (Tuple pos value) = if value < (minimum adj # fromMaybe 0) then Just value else Nothing
-      where
-      adj = neighbors i pos
-
-    search pos { seen, res } =
-      let
-        Tuple seenPost size = startFill i pos seen
-      in
-        { seen: seenPost, res: A.snoc res size }
-
-    riskLevels = i # M.toUnfoldable
-      # A.mapMaybe isLowest
-      <#> add 1
-      # sum
-
-    res = i # M.keys
-      # A.fromFoldable
-      # A.foldr search { seen: S.empty, res: [] }
-      # _.res
-      # A.filter (notEq 0)
-      # A.sort
-      # A.takeEnd 3
-      # product
+    numNodes = M.size i
+    allStates = L.iterate step { state: i, flashed: S.empty }
+    first = allStates # L.take (1 + 100) # A.fromFoldable
+    second = allStates # L.findIndex (_.flashed >>> S.size >>> (eq numNodes)) # fromMaybe 0
   in
     do
-      log "Day 09"
-      log $ show riskLevels
-      log $ show res
+      log "Day 11"
+      log $ first <#> _.flashed <#> S.size # sum # show
+      log $ show second
 
 main :: Effect Unit
 main = do
-  FS.readTextFile UTF8 "input/d09.txt" (parse >>> solve)
+  FS.readTextFile UTF8 "input/d11.txt" (parse >>> solve)
