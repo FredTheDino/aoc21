@@ -18,6 +18,7 @@ import Day09 as D09
 import Day10 as D10
 import Day11 as D11
 import Day12 as D12
+import Day13 as D13
 
 allDays :: Array (Effect Unit)
 allDays =
@@ -33,6 +34,7 @@ allDays =
   , D10.main
   , D11.main
   , D12.main
+  , D13.main
   ]
 
 runAll :: Effect Unit
